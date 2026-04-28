@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vehicle Maintenance & Modification Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Exo+2:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a0e1a;
+    --navy2: #111827;
+    --navy3: #1a2236;
+    --blue: #1a6fc4;
+    --blue-bright: #2d8fff;
+    --blue-glow: rgba(45,143,255,0.15);
+    --accent: #3daeff;
+    --silver: #c8d6e8;
+    --silver2: #8fa3bc;
+    --silver3: #4a5a72;
+    --text: #e8f0fb;
+    --text2: #9fb3cc;
+    --border: rgba(45,143,255,0.2);
+    --border2: rgba(45,143,255,0.4);
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--navy2) 0%, var(--navy3) 100%);
+    border-bottom: 2px solid var(--blue);
+    padding: 20px 24px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: var(--blue-glow);
+    border-radius: 50%;
+    filter: blur(40px);
+  }
+  .header-badge {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .badge-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-bright));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 16px rgba(45,143,255,0.4);
+  }
+  .badge-text { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+  .header h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 26px; font-weight: 700;
+    line-height: 1.1;
+    color: white;
+  }
+  .header h1 span { color: var(--accent); }
+  .header p { font-size: 12px; color: var(--text2); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--navy2);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 1; min-width: 90px;
+    padding: 14px 8px 12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text2);
+    border: none; background: none; cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .tab .tab-icon { font-size: 16px; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--blue-bright); }
+  .tab:hover:not(.active) { color: var(--silver); }
+
+  /* MAIN */
+  .main { padding: 20px 16px; max-width: 700px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .card-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-header-icon {
+    width: 28px; height: 28px;
+    background: var(--blue-glow);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .card-title { font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-full { grid-column: 1 / -1; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  label { font-size: 11px; color: var(--text2); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500; }
+  input, select, textarea {
+    background: rgba(10,14,26,0.8);
+    border: 1px solid var(--silver3);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    font-size: 13px;
+    padding: 8px 10px;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--blue-bright);
+    box-shadow: 0 0 0 2px rgba(45,143,255,0.15);
+  }
+  select option { background: var(--navy2); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    cursor: pointer; border: none; transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue), var(--blue-bright));
+    color: white;
+    box-shadow: 0 4px 12px rgba(45,143,255,0.3);
+  }
+  .btn-primary:hover { box-shadow: 0 4px 20px rgba(45,143,255,0.5); transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--silver3);
+    color: var(--text2);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
+  .btn-danger:hover { background: rgba(239,68,68,0.25); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 500px; }
+  thead th {
+    background: rgba(45,143,255,0.1);
+    padding: 10px 12px;
+    text-align: left;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border2);
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(45,143,255,0.05); }
+  tbody td { padding: 10px 12px; color: var(--text); vertical-align: top; }
+  .td-muted { color: var(--text2); }
+  .empty-row td { text-align: center; color: var(--silver3); font-style: italic; padding: 24px; }
+
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .badge-blue { background: rgba(45,143,255,0.2); color: var(--accent); border: 1px solid rgba(45,143,255,0.3); }
+  .badge-green { background: rgba(34,197,94,0.15); color: #86efac; border: 1px solid rgba(34,197,94,0.3); }
+  .badge-amber { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+  .badge-red { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+  .badge-purple { background: rgba(139,92,246,0.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat-card {
+    background: rgba(45,143,255,0.07);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-value { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100; padding: 16px;
+    align-items: flex-start; justify-content: center;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--navy2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    width: 100%; max-width: 520px;
+    padding: 20px;
+    margin-top: 20px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .modal-title { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 16px; }
+  .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text2); cursor: pointer; font-size: 18px; line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  /* PROFILE DISPLAY */
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .profile-item { }
+  .profile-key { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .profile-val { font-size: 14px; color: var(--text); font-weight: 500; }
+  .profile-val.empty { color: var(--silver3); font-style: italic; font-weight: 400; }
+
+  /* TYPE CHECKBOXES */
+  .type-options { display: flex; gap: 8px; flex-wrap: wrap; }
+  .type-opt { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .type-opt input[type="radio"] { accent-color: var(--blue-bright); }
+  .type-opt span { font-size: 12px; color: var(--text2); }
+
+  /* TOOLTIP trigger */
+  .delete-btn { background: none; border: none; color: var(--silver3); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px; }
+  .delete-btn:hover { color: #fca5a5; background: rgba(239,68,68,0.1); }
+
+  /* SUMMARY SECTION */
+  .expense-summary { background: rgba(45,143,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+  .expense-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .expense-row:last-child { border-bottom: none; font-weight: 600; color: var(--accent); }
+  .expense-label { font-size: 13px; color: var(--text2); }
+  .expense-val { font-family: 'Rajdhani', sans-serif; font-size: 15px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">
+    <div class="badge-icon">🚗</div>
+    <div>
+      <div class="badge-text">Professional Vehicle Record System</div>
+    </div>
+  </div>
+  <h1>Vehicle <span>Maintenance &</span><br>Modification Planner</h1>
+  <p>Track · Maintain · Mod · Prove Your Car's Worth</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('profile')">
+    <span class="tab-icon">👤</span>Profile
+  </button>
+  <button class="tab" onclick="showTab('maintenance')">
+    <span class="tab-icon">🔧</span>Maintenance
+  </button>
+  <button class="tab" onclick="showTab('mods')">
+    <span class="tab-icon">⚙️</span>Mods
+  </button>
+  <button class="tab" onclick="showTab('expenses')">
+    <span class="tab-icon">💰</span>Expenses
+  </button>
+</div>
+
+<div class="main">
+
+  <!-- VEHICLE PROFILE -->
+  <div id="section-profile" class="section active">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">👤</div>
+        <div class="card-title">Owner Information</div>
+      </div>
+      <div class="form-grid" id="owner-display"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">🚗</div>
+        <div class="card-title">Vehicle Information</div>
+      </div>
+      <div class="form-grid" id="vehicle-display"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">📋</div>
+        <div class="card-title">Appraisal Notes / Special Features</div>
+      </div>
+      <div id="notes-display" style="font-size:13px; color:var(--text2); line-height:1.6;"></div>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('modal-profile')">✏️ Edit Profile</button>
+  </div>
+
+  <!-- MAINTENANCE LOG -->
+  <div id="section-maintenance" class="section">
+    <div class="stats-grid" id="maint-stats"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="card-title" style="font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);">Service History</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-maintenance')">+ Add Entry</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Mileage</th><th>Service</th><th>Shop/DIY</th><th>Cost</th><th>Notes</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="maint-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODIFICATION TRACKER -->
+  <div id="section-mods" class="section">
+    <div class="stats-grid" id="mod-stats"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="card-title" style="font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);">Modification History</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-mod')">+ Add Mod</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Modification</th><th>Brand/Part</th><th>Type</th><th>Cost</th><th>Installed By</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="mod-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div id="section-expenses" class="section">
+    <div class="expense-summary" id="expense-summary"></div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">📊</div>
+        <div class="card-title">Receipt & Expense Tracker</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Notes</th><th></th></tr>
+          </thead>
+          <tbody id="expense-body"></tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-expense')">+ Add Expense</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- Profile Modal -->
+<div class="modal-overlay" id="modal-profile">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-profile')">✕</button>
+    <div class="modal-title">Edit Vehicle Profile</div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Owner Information</div>
+    <div class="form-grid">
+      <div class="form-group form-full"><label>Name</label><input id="p-name" placeholder="Full name"></div>
+      <div class="form-group"><label>Phone</label><input id="p-phone" placeholder="+1 (000) 000-0000"></div>
+      <div class="form-group"><label>Email</label><input id="p-email" placeholder="email@example.com"></div>
+    </div>
+    <hr class="divider">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Vehicle Information</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Year</label><input id="p-year" placeholder="2020" type="number"></div>
+      <div class="form-group"><label>Make</label><input id="p-make" placeholder="Toyota"></div>
+      <div class="form-group"><label>Model</label><input id="p-model" placeholder="Camry"></div>
+      <div class="form-group"><label>VIN</label><input id="p-vin" placeholder="1HGBH41JXMN109186"></div>
+      <div class="form-group"><label>License Plate</label><input id="p-plate" placeholder="ABC 1234"></div>
+      <div class="form-group"><label>Color / Trim</label><input id="p-color" placeholder="Midnight Blue SE"></div>
+      <div class="form-group"><label>Purchase Date</label><input id="p-purchase-date" type="date"></div>
+      <div class="form-group"><label>Purchase Price</label><input id="p-purchase-price" placeholder="$25,000" type="number"></div>
+      <div class="form-group form-full"><label>Insurance Company / Policy #</label><input id="p-insurance" placeholder="State Farm — Policy #123456"></div>
+    </div>
+    <hr class="divider">
+    <div class="form-group">
+      <label>Appraisal Notes / Special Features</label>
+      <textarea id="p-notes" placeholder="Special features, modifications, notes for appraisal..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveProfile()">💾 Save Profile</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-profile')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Maintenance Modal -->
+<div class="modal-overlay" id="modal-maintenance">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-maintenance')">✕</button>
+    <div class="modal-title">Add Maintenance Entry</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Date</label><input id="m-date" type="date"></div>
+      <div class="form-group"><label>Mileage</label><input id="m-mileage" type="number" placeholder="45,000"></div>
+      <div class="form-group form-full">
+        <label>Service Performed</label>
+        <select id="m-service">
+          <option value="">— Select service —</option>
+          <option>Oil Change</option>
+          <option>Tire Rotation</option>
+          <option>Brake Inspection</option>
+          <option>Brake Pad Replacement</option>
+          <option>Air Filter Replacement</option>
+          <option>Spark Plug Replacement</option>
+          <option>Transmission Service</option>
+          <option>Coolant Flush</option>
+          <option>Battery Replacement</option>
+          <option>Wheel Alignment</option>
+          <option>AC Service</option>
+          <option>Timing Belt/Chain</option>
+          <option>Wiper Blade Replacement</option>
+          <option>Fluid Top-Off</option>
+          <option>Multi-Point Inspection</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group form-full" id="m-service-other-wrap" style="display:none">
+        <label>Specify Service</label>
+        <input id="m-service-other" placeholder="Describe the service performed">
+      </div>
+      <div class="form-group">
+        <label>Shop / DIY</label>
+        <select id="m-shop">
+          <option value="DIY">DIY</option>
+          <option value="Dealership">Dealership</option>
+          <option value="Independent Shop">Independent Shop</option>
+          <option value="Chain Shop">Chain Shop (Jiffy Lube, etc.)</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Cost ($)</label><input id="m-cost" type="number" placeholder="0.00" step="0.01"></div>
+      <div class="form-group form-full"><label>Notes</label><input id="m-notes" placeholder="Parts used, findings, next service due..."></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="addMaintenance()">+ Add Entry</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-maintenance')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mod Modal -->
+<div class="modal-overlay" id="modal-mod">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-mod')">✕</button>
+    <div class="modal-title">Add Modification</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Date</label><input id="mod-date" type="date"></div>
+      <div class="form-group"><label>Mileage at Install</label><input id="mod-mileage" type="number" placeholder="45,000"></div>
+      <div class="form-group form-full"><label>Modification / Part Name</label><input id="mod-name" placeholder="e.g. Cold Air Intake, Coilover Suspension..."></div>
+      <div class="form-group form-full"><label>Brand / Part #</label><input id="mod-brand" placeholder="e.g. K&N #69-1020 or AEM 21-8024DC"></div>
+      <div class="form-group form-full">
+        <label>Type</label>
+        <div class="type-options">
+          <label class="type-opt"><input type="radio" name="mod-type" value="Performance" checked><span>Performance</span></label>
+          <label class="type-opt"><input type="radio" name="mod-type" value="Cosmetic"><span>Cosmetic</span></label>
+          <label class="type-opt"><input type="radio" name="mod-type" value="Functional"><span>Functional</span></label>
+          <label class="type-opt"><input type="radio" name="mod-type" value="Other"><span>Other</span></label>
+        </div>
+      </div>
+      <div class="form-group"><label>Cost ($)</label><input id="mod-cost" type="number" placeholder="0.00" step="0.01"></div>
+      <div class="form-group">
+        <label>Installed By</label>
+        <select id="mod-installer">
+          <option value="Self">Self</option>
+          <option value="Shop">Shop</option>
+          <option value="Dealership">Dealership</option>
+          <option value="Specialist">Specialist</option>
+        </select>
+      </div>
+      <div class="form-group form-full"><label>Notes</label><input id="mod-notes" placeholder="Reason, result, warranty info..."></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="addMod()">+ Add Mod</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-mod')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-overlay" id="modal-expense">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-expense')">✕</button>
+    <div class="modal-title">Add Expense</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Date</label><input id="e-date" type="date"></div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="e-cat">
+          <option value="Maintenance">Maintenance</option>
+          <option value="Modification">Modification</option>
+          <option value="Fuel">Fuel</option>
+          <option value="Insurance">Insurance</option>
+          <option value="Registration">Registration</option>
+          <option value="Tires">Tires</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group form-full"><label>Description</label><input id="e-desc" placeholder="Brief description..."></div>
+      <div class="form-group"><label>Amount ($)</label><input id="e-amount" type="number" placeholder="0.00" step="0.01"></div>
+      <div class="form-group"><label>Notes</label><input id="e-notes" placeholder="Receipt #, vendor..."></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="addExpense()">+ Add Expense</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-expense')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY = 'vmp_data_v1';
+let data = JSON.parse(localStorage.getItem(KEY) || 'null') || {
+  profile: {}, maintenance: [], mods: [], expenses: []
+};
+const save = () => localStorage.setItem(KEY, JSON.stringify(data));
+
+function showTab(t) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + t).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (t === 'maintenance') renderMaintenance();
+  if (t === 'mods') renderMods();
+  if (t === 'expenses') renderExpenses();
+}
+
+function openModal(id) {
+  if (id === 'modal-profile') populateProfileForm();
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Profile
+function populateProfileForm() {
+  const p = data.profile;
+  ['name','phone','email','year','make','model','vin','plate','color','purchase-date','purchase-price','insurance','notes'].forEach(k => {
+    const el = document.getElementById('p-' + k);
+    if (el) el.value = p[k] || '';
+  });
+}
+function saveProfile() {
+  const keys = ['name','phone','email','year','make','model','vin','plate','color','purchase-date','purchase-price','insurance','notes'];
+  keys.forEach(k => {
+    const el = document.getElementById('p-' + k);
+    if (el) data.profile[k] = el.value;
+  });
+  save();
+  renderProfile();
+  closeModal('modal-profile');
+}
+function renderProfile() {
+  const p = data.profile;
+  const ownerFields = [
+    ['Name', p.name], ['Phone', p.phone], ['Email', p.email]
+  ];
+  const vehicleFields = [
+    ['Year', p.year], ['Make', p.make], ['Model', p.model],
+    ['VIN', p.vin], ['License Plate', p.plate], ['Color / Trim', p.color],
+    ['Purchase Date', p['purchase-date']], ['Purchase Price', p['purchase-price'] ? '$' + Number(p['purchase-price']).toLocaleString() : ''],
+    ['Insurance', p.insurance]
+  ];
+  const render = (fields) => fields.map(([k,v]) =>
+    `<div class="profile-item"><div class="profile-key">${k}</div><div class="profile-val ${v ? '' : 'empty'}">${v || '—'}</div></div>`
+  ).join('');
+  document.getElementById('owner-display').innerHTML = render(ownerFields);
+  document.getElementById('vehicle-display').innerHTML = render(vehicleFields);
+  document.getElementById('notes-display').innerHTML = p.notes
+    ? `<p>${p.notes}</p>`
+    : '<span style="color:var(--silver3);font-style:italic">No notes added.</span>';
+}
+
+// Maintenance
+document.getElementById('m-service').addEventListener('change', function() {
+  document.getElementById('m-service-other-wrap').style.display = this.value === 'Other' ? '' : 'none';
+});
+function addMaintenance() {
+  const svc = document.getElementById('m-service').value;
+  const service = svc === 'Other' ? document.getElementById('m-service-other').value : svc;
+  if (!service || !document.getElementById('m-date').value) { alert('Please fill in date and service.'); return; }
+  data.maintenance.unshift({
+    id: Date.now(),
+    date: document.getElementById('m-date').value,
+    mileage: document.getElementById('m-mileage').value,
+    service,
+    shop: document.getElementById('m-shop').value,
+    cost: document.getElementById('m-cost').value,
+    notes: document.getElementById('m-notes').value
+  });
+  save(); renderMaintenance(); closeModal('modal-maintenance');
+  ['m-date','m-mileage','m-cost','m-notes','m-service-other'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('m-service').value = '';
+  document.getElementById('m-service-other-wrap').style.display = 'none';
+}
+function deleteMaintenance(id) {
+  data.maintenance = data.maintenance.filter(r => r.id !== id);
+  save(); renderMaintenance();
+}
+function renderMaintenance() {
+  const body = document.getElementById('maint-body');
+  const totalCost = data.maintenance.reduce((a,r) => a + (parseFloat(r.cost)||0), 0);
+  const statsEl = document.getElementById('maint-stats');
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-value">${data.maintenance.length}</div><div class="stat-label">Total Services</div></div>
+    <div class="stat-card"><div class="stat-value">$${totalCost.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="stat-label">Total Spent</div></div>
+  `;
+  if (!data.maintenance.length) {
+    body.innerHTML = '<tr class="empty-row"><td colspan="7">No maintenance records yet. Add your first entry!</td></tr>';
+    return;
+  }
+  body.innerHTML = data.maintenance.map(r => `
+    <tr>
+      <td class="td-muted">${r.date}</td>
+      <td>${r.mileage ? Number(r.mileage).toLocaleString() : '—'}</td>
+      <td><strong>${r.service}</strong></td>
+      <td><span class="badge badge-blue">${r.shop}</span></td>
+      <td>${r.cost ? '$'+parseFloat(r.cost).toFixed(2) : '—'}</td>
+      <td class="td-muted" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.notes || '—'}</td>
+      <td><button class="delete-btn" onclick="deleteMaintenance(${r.id})">🗑</button></td>
+    </tr>
+  `).join('');
+}
+
+// Mods
+function addMod() {
+  const name = document.getElementById('mod-name').value;
+  if (!name || !document.getElementById('mod-date').value) { alert('Please fill in date and modification name.'); return; }
+  const type = document.querySelector('input[name="mod-type"]:checked').value;
+  data.mods.unshift({
+    id: Date.now(),
+    date: document.getElementById('mod-date').value,
+    mileage: document.getElementById('mod-mileage').value,
+    name,
+    brand: document.getElementById('mod-brand').value,
+    type,
+    cost: document.getElementById('mod-cost').value,
+    installer: document.getElementById('mod-installer').value,
+    notes: document.getElementById('mod-notes').value
+  });
+  save(); renderMods(); closeModal('modal-mod');
+  ['mod-date','mod-mileage','mod-name','mod-brand','mod-cost','mod-notes'].forEach(id => { document.getElementById(id).value = ''; });
+}
+function deleteMod(id) {
+  data.mods = data.mods.filter(r => r.id !== id);
+  save(); renderMods();
+}
+const typeColors = { Performance: 'badge-amber', Cosmetic: 'badge-purple', Functional: 'badge-green', Other: 'badge-blue' };
+function renderMods() {
+  const body = document.getElementById('mod-body');
+  const totalCost = data.mods.reduce((a,r) => a + (parseFloat(r.cost)||0), 0);
+  const statsEl = document.getElementById('mod-stats');
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-value">${data.mods.length}</div><div class="stat-label">Total Mods</div></div>
+    <div class="stat-card"><div class="stat-value">$${totalCost.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="stat-label">Total Invested</div></div>
+  `;
+  if (!data.mods.length) {
+    body.innerHTML = '<tr class="empty-row"><td colspan="7">No modifications recorded yet.</td></tr>';
+    return;
+  }
+  body.innerHTML = data.mods.map(r => `
+    <tr>
+      <td class="td-muted">${r.date}</td>
+      <td><strong>${r.name}</strong>${r.notes ? `<br><span style="font-size:11px;color:var(--text2)">${r.notes}</span>` : ''}</td>
+      <td class="td-muted" style="font-size:11px">${r.brand || '—'}</td>
+      <td><span class="badge ${typeColors[r.type]||'badge-blue'}">${r.type}</span></td>
+      <td>${r.cost ? '$'+parseFloat(r.cost).toFixed(2) : '—'}</td>
+      <td class="td-muted">${r.installer}</td>
+      <td><button class="delete-btn" onclick="deleteMod(${r.id})">🗑</button></td>
+    </tr>
+  `).join('');
+}
+
+// Expenses
+function addExpense() {
+  const desc = document.getElementById('e-desc').value;
+  if (!desc || !document.getElementById('e-date').value) { alert('Please fill in date and description.'); return; }
+  data.expenses.unshift({
+    id: Date.now(),
+    date: document.getElementById('e-date').value,
+    cat: document.getElementById('e-cat').value,
+    desc,
+    amount: document.getElementById('e-amount').value,
+    notes: document.getElementById('e-notes').value
+  });
+  save(); renderExpenses(); closeModal('modal-expense');
+  ['e-date','e-desc','e-amount','e-notes'].forEach(id => { document.getElementById(id).value = ''; });
+}
+function deleteExpense(id) {
+  data.expenses = data.expenses.filter(r => r.id !== id);
+  save(); renderExpenses();
+}
+const catColors = { Maintenance: 'badge-blue', Modification: 'badge-amber', Fuel: 'badge-green', Insurance: 'badge-purple', Registration: 'badge-blue', Tires: 'badge-amber', Other: 'badge-blue' };
+function renderExpenses() {
+  const cats = ['Maintenance','Modification','Fuel','Insurance','Registration','Tires','Other'];
+  const totals = {};
+  cats.forEach(c => totals[c] = 0);
+  data.expenses.forEach(r => { const c = r.cat || 'Other'; totals[c] = (totals[c]||0) + (parseFloat(r.amount)||0); });
+  const grand = Object.values(totals).reduce((a,b) => a+b, 0);
+  const summaryEl = document.getElementById('expense-summary');
+  summaryEl.innerHTML = cats.filter(c => totals[c]>0).map(c =>
+    `<div class="expense-row"><span class="expense-label">${c}</span><span class="expense-val">$${totals[c].toFixed(2)}</span></div>`
+  ).join('') +
+  `<div class="expense-row"><span class="expense-label" style="font-weight:600;color:var(--text)">Grand Total</span><span class="expense-val">$${grand.toFixed(2)}</span></div>`;
+
+  const body = document.getElementById('expense-body');
+  if (!data.expenses.length) {
+    body.innerHTML = '<tr class="empty-row"><td colspan="6">No expenses recorded yet.</td></tr>';
+    return;
+  }
+  body.innerHTML = data.expenses.map(r => `
+    <tr>
+      <td class="td-muted">${r.date}</td>
+      <td><span class="badge ${catColors[r.cat]||'badge-blue'}">${r.cat}</span></td>
+      <td>${r.desc}</td>
+      <td><strong>${r.amount ? '$'+parseFloat(r.amount).toFixed(2) : '—'}</strong></td>
+      <td class="td-muted" style="font-size:11px">${r.notes || '—'}</td>
+      <td><button class="delete-btn" onclick="deleteExpense(${r.id})">🗑</button></td>
+    </tr>
+  `).join('');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
+});
+
+// Init
+renderProfile();
+renderMaintenance();
+</script>
+</body>
+</html>
